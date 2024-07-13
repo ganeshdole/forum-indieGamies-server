@@ -27,21 +27,21 @@ const PORT = process.env.SERVER_PORT || 4000;
 app.use(express.json());
 app.use(cors());
 
-// app.use(cors({
-//   origin: 'http://your-frontend-domain.com',
-//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-// }));
+app.use(cors({
+  origin: ['https://forum-indiegamies.netlify.app/','http://forum.indiegamies.com/'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+}));
 
 app.use(helmet());
 app.use(compression());
 app.use(morgan('combined'));
 
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, 
-//   max: 1000, 
-// });
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 50 * 15,
+});
 
-// app.use(limiter);
+app.use(limiter);
 
 app.use((req, res, next)=>{
   console.log(req.url,"\n")
