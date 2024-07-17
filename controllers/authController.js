@@ -15,7 +15,6 @@ const requestOtp = async (req, res) => {
     console.log(req.body)
     const { email } = req.body;
     const otp = otpGenerator();
-    console.log(otp);
     otpStorage[email] = otp;
 
     const data = {
