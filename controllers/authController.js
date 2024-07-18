@@ -1,21 +1,27 @@
-const {otpGenerator} = require('../utils/utils');
+const { otpGenerator, createError, createSuccess, generateToken } = require('../utils/utils');
 const userModel = require('../db/models/userModel');
-const {createError, createSuccess} = require('../utils/utils');
 const bcryptJs = require('bcryptjs');
-const jwt  = require('jsonwebtoken')
-const formData = require('form-data');
-const Mailgun = require('mailgun.js');
+const mg = require('../utils/mg');
 
-const otpStorage = {}; 
-const mailgun = new Mailgun(formData);
-const mg = mailgun.client({username: 'api', key: process.env.MAILGUN_API_KEY });
-
+const OTP_EXPIRY_MS = 10 * 60 * 1000; 
+const otpStorage = {};
 
 const requestOtp = async (req, res) => {
-    console.log(req.body)
     const { email } = req.body;
+    if (!email) {
+        return res.send(createError('Email is required'));
+    }
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+        return res.send(createError('User not found'));
+    }
+
     const otp = otpGenerator();
-    otpStorage[email] = otp;
+    otpStorage[email] = {
+        otp,
+        expiresAt: Date.now() + OTP_EXPIRY_MS
+    };
 
     const data = {
         to: email,
@@ -30,7 +36,7 @@ const requestOtp = async (req, res) => {
                         <div style="background-color: #e9e9e9; padding: 10px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
                             ${otp}
                         </div>
-                        <p style="font-size: 14px; text-align: center; color: #777;">This OTP is valid for a limited time. Please do not share it with anyone.</p>
+                        <p style="font-size: 14px; text-align: center; color: #777;">This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
                         <p style="font-size: 14px; text-align: center; margin-top: 30px;">If you didn't request this OTP, please ignore this email.</p>
                     </div>
                 </body>
@@ -38,45 +44,48 @@ const requestOtp = async (req, res) => {
         `
     };
 
-
     try {
-        const msg = await mg.messages.create('mail.indiegamies.com', data);
-        console.log(msg); 
+        await mg.messages.create('mail.indiegamies.com', data);
         res.send(createSuccess('OTP sent to your email'));
     } catch (error) {
-        console.log(error);
+        console.error('Error sending OTP:', error);
         res.send(createError('Error sending OTP'));
     }
 };
 
 const verifyOtp = (req, res) => {
-    console.log(req.body)
     const { email, otp } = req.body;
-    if (otpStorage[email] === otp) {
+    
+    if (!email || !otp) {
+        return res.send(createError('Email and OTP are required'));
+    }
+
+    const storedOtpData = otpStorage[email];
+    
+    if (!storedOtpData) {
+        return res.send(createError('OTP not found or already used'));
+    }
+
+    if (Date.now() > storedOtpData.expiresAt) {
         delete otpStorage[email];
-        res.send(createSuccess('OTP verified successfully'));
+        return res.send(createError('OTP has expired'));
+    }
+
+    if (storedOtpData.otp === otp) {
+        delete otpStorage[email];
+        return res.send(createSuccess('OTP verified successfully'));
     } else {
-        res.send(createError('Invalid OTP'));
+        return res.send(createError('Invalid OTP'));
     }
 };
 
-
-
-// Register User
 const registerUser = async (req, res) => {
     try {
-       
         const { username, email, password } = req.body;
-        let user = await userModel.findOne({ username });
+        let user = await userModel.findOne({ $or: [{ username }, { email }] });
 
         if (user) {
-            return res.json(createError('Username already exists'));
-        }
-
-        user = await userModel.findOne({ email });
-        
-        if (user) {
-            return res.json(createError('Email already exists'));
+            return res.json(createError(user.username === username ? 'Username already exists' : 'Email already exists'));
         }
 
         const salt = await bcryptJs.genSalt(10);
@@ -96,15 +105,12 @@ const registerUser = async (req, res) => {
     }
 };
 
-// Sign-in user 
 const signinUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(req.body)
         const user = await userModel.findOne({ email });
 
         if (!user) {
-            console.log('User not found');
             return res.json(createError('User not found'));
         }
 
@@ -113,21 +119,29 @@ const signinUser = async (req, res) => {
             return res.status(400).json(createError('Invalid Password'));
         }
 
-        const token = jwt.sign(
-            { id: user._id, username: user.username, email: user.email },
-            process.env.JWT_SECRETE
-        );
+        const token = generateToken(user, '2h'); 
 
         res.status(200).json(createSuccess({ message: 'User signed in successfully', token }));
     } catch (error) {
-        console.log('Error in signing-in user', error);
-        return res.status(500).json(createError('Signing in user', error.message));
+        console.error('Error in signing-in user', error);
+        return res.status(500).json(createError('Error signing in user', error.message));
     }
 };
+
+const cleanupExpiredOtps = () => {
+    const now = Date.now();
+    Object.keys(otpStorage).forEach(email => {
+        if (otpStorage[email].expiresAt <= now) {
+            delete otpStorage[email];
+        }
+    });
+};
+
+setInterval(cleanupExpiredOtps, 15 * 60 * 1000);
 
 module.exports = {
     requestOtp,
     verifyOtp,
     registerUser,
     signinUser
-}
+};
