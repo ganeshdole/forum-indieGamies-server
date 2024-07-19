@@ -16,7 +16,9 @@ const userRouter = require("./routes/user");
 const threadsRouter = require('./routes/threads');
 const categoriesRouter = require('./routes/categories');
 const repliesRouter = require('./routes/replies');
+const forgotPasswordRouter = require('./routes/forgotPassword');
 const authMiddleware = require('./middleware/authMiddleware');
+
 
 
 const app = express();
@@ -60,6 +62,7 @@ app.use('/user', userRouter);
 app.use('/categories', categoriesRouter)
 app.use('/threads', threadsRouter);
 app.use('/replies', repliesRouter);
+app.use("/forgot-password", forgotPasswordRouter);
 
 connectDB()
   .then(()=>{

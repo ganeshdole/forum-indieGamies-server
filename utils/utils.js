@@ -27,7 +27,7 @@ function generateToken(user, expiresTime = null) {
     );
 }
 
-const OTP_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
+const OTP_EXPIRY_MS = 10 * 60 * 1000; 
 
 module.exports = {
     createError,

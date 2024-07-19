@@ -1,10 +1,14 @@
 const OTP_EXPIRY_MS = 5 * 60 * 1000; 
 const {generateToken} = require("../utils/utils")
-
-
+const userModel = require("../db/models/userModel")
+const {createError, createSuccess} = require("../utils/utils")
 const otpStorage = {};
+const {otpGenerator} = require("../utils/utils")
+const mg = require("../utils/mg")
+
 
 const requestOtp = async (req, res) => {
+    console.log(req.body)
     const { email } = req.body;
     if (!email) {
         return res.send(createError('Email is required'));
@@ -31,7 +35,7 @@ const requestOtp = async (req, res) => {
         to : email,
         from: 'IndieGamies <no-reply@indiegamies.com>',
         subject: "Your OTP Code",
-        html: 
+        html: `
             <html>
                 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                     <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
@@ -45,7 +49,7 @@ const requestOtp = async (req, res) => {
                     </div>
                 </body>
             </html>
-        
+        `
     };
 
     try {
@@ -56,12 +60,14 @@ const requestOtp = async (req, res) => {
             clearTimeout(otpStorage[email].timeoutId);
             delete otpStorage[email];
         }
+        console.error('Error sending OTP:', error);
         res.send(createError(error));
     }
 };
 
 
 const verifyOtp = async (req, res) =>{
+    console.log(req.body)
     const { email, otp } = req.body;
     const storedOTPData = otpStorage[email];
 
@@ -69,7 +75,7 @@ const verifyOtp = async (req, res) =>{
         res.send(createError('OTP expired'));
     }
 
-    if (Date.now() > storedOtpData.expiresAt) {
+    if (Date.now() > storedOTPData.expiresAt) {
         delete otpStorage[email];
         return res.send(createError('OTP has expired'));
     }
