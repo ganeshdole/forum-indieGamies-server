@@ -81,7 +81,7 @@ const verifyOtp = async (req, res) =>{
         return res.send(createError('OTP has expired'));
     }
     
-    if(storedOTPData.otp !== otp){
+    if(storedOTPData?.otp !== otp){
         res.send(createError('Invalid OTP'));
     }
     
