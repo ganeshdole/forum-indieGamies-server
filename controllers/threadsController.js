@@ -26,7 +26,6 @@ const getThreadById = async(req, res) =>{
         }
 
         const thread = await threadsModel.findById(threadId);
-        console.log(thread)
         if (!thread) {
             return res.status(404).json({ message: 'No thread found' });
         }
@@ -96,7 +95,6 @@ const updateThreadById = async (req, res) =>{
             return res.status(400).json({ message: 'Thread ID is required' });
         }
 
-        console.log(req.body)
         const {views, replies , description } = req.body;
 
         if(views) thread.views = views;

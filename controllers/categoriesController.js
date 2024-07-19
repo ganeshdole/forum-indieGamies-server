@@ -5,7 +5,6 @@ const { createSuccess, createError } = require('../utils/utils');
 const getCategorie = async (req, res) => {
     try {
         const categorieId = req.params.id;
-        console.log(categorieId)
         const categorie = await categoriesModel.findById(categorieId);
         
         if (!categorie) {

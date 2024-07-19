@@ -8,7 +8,6 @@ const mg = require("../utils/mg")
 
 
 const requestOtp = async (req, res) => {
-    console.log(req.body)
     const { email } = req.body;
     if (!email) {
         return res.send(createError('Email is required'));

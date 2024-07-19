@@ -6,7 +6,6 @@ const { createSuccess, createError } = require('../utils/utils')
  const getRepliesByThreadId = async (req, res) => {
     try {
         const threadId = req.params.threadId;
-        console.log(threadId)
         const replies = await repliesModel.find({ threadId: threadId }).sort({ createdAt: -1 });
         if (!replies) {
             return res.status(404).json(createError('No replies found for this thread'));
@@ -39,7 +38,6 @@ const postReply = async (req, res) => {
     try{
         const { threadId, content } = req.body;
         const {username } = req.user;
-        console.log(threadId, content, username)
         if(!threadId || !content){
             return res.status(400).json(createError('Thread ID and content are required'));
         }
