@@ -67,15 +67,17 @@ const requestOtp = async (req, res) => {
 
 
 const verifyOtp = async (req, res) =>{
-    console.log(req.body)
+    console.log( req.body )
     const { email, otp } = req.body;
-    const storedOTPData = otpStorage[email];
+    
 
+    const storedOTPData = otpStorage[email];
+    console.log(storedOTPData);
     if(!storedOTPData){
         res.send(createError('OTP expired'));
     }
 
-    if (Date.now() > storedOTPData.expiresAt) {
+    if (Date.now() > storedOTPData?.expiresAt) {
         delete otpStorage[email];
         return res.send(createError('OTP has expired'));
     }
@@ -90,6 +92,7 @@ const verifyOtp = async (req, res) =>{
         if (!user) {
             return res.status(404).json(createError('User not found'));
         }
+        
         const token = generateToken(user, '10m'); 
         res.status(200).json(createSuccess({ message: 'OTP verified successfully', token }));
     } catch (error) {
