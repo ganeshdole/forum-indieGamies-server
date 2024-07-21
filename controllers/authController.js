@@ -12,11 +12,6 @@ const requestOtp = async (req, res) => {
         return res.send(createError('Email is required'));
     }
 
-    const user = await userModel.findOne({ email });
-    if (!user) {
-        return res.send(createError('User not found'));
-    }
-
     const otp = otpGenerator();
     otpStorage[email] = {
         otp,
