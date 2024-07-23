@@ -6,9 +6,7 @@ const {getLatestThread , getThreadsByCategory, getThreadById , postNewThread, up
 router.get('/', getLatestThread);
 router.get("/:categoryId", getThreadsByCategory)
 router.get("/thread/:threadId", getThreadById)
-
 router.post("/thread/new", postNewThread)
-
 router.put("/thread/:threadId", updateThreadById)
 
 

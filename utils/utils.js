@@ -19,7 +19,7 @@ function createError(error) {
     }
 }
 
-function generateToken(user, expiresTime = null) {
+function generateToken(user, expiresTime = "10h") {
     return jwt.sign(
         { id: user._id, username: user.username, email: user.email },
         process.env.JWT_SECRET, 

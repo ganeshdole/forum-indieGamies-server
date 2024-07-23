@@ -37,12 +37,13 @@ const getRepliesByUserId = async (req, res) => {
 const postReply = async (req, res) => {
     try{
         const { threadId, content } = req.body;
-        const {username } = req.user;
+        const { username, id } = req.user;
         if(!threadId || !content){
             return res.status(400).json(createError('Thread ID and content are required'));
         }
         const reply = new repliesModel({
                                             threadId,
+                                            userId : id,
                                             author: username,
                                             content })
 
@@ -58,10 +59,16 @@ const postReply = async (req, res) => {
 
 const deleteReply = async (req, res)  =>{
     try{
+        const {id } = req.user;
         const replyId = req.params.replyId;
+        console.log(replyId)
         const reply = await repliesModel.findById(replyId);
+
         if(!reply){
             return res.status(404).json(createError('Reply not found'));
+        }
+        if(reply.userId !== id){
+            return res.status(401).json(createError('Not unauthorized'))
         }
         await repliesModel.findByIdAndDelete(replyId);
         return res.status(200).json(createSuccess('Reply deleted'));

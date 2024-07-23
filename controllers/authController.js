@@ -114,9 +114,9 @@ const signinUser = async (req, res) => {
             return res.status(400).json(createError('Invalid Password'));
         }
 
-        const token = generateToken(user, '2h'); 
+        const token = generateToken(user); 
 
-        res.status(200).json(createSuccess({ message: 'User signed in successfully', token }));
+        res.status(200).json(createSuccess({ message: 'User signed in successfully', token, userId : user._id }));
     } catch (error) {
         console.error('Error in signing-in user', error);
         return res.status(500).json(createError('Error signing in user', error.message));

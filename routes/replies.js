@@ -5,6 +5,6 @@ const { getRepliesByThreadId, postReply, deleteReply } = require('../controllers
 
 router.get('/:threadId', getRepliesByThreadId);
 router.post('/new', postReply);
-router.delete('/:replyId', deleteReply);
+router.delete('/delete/:replyId', deleteReply);
 
 module.exports = router;
