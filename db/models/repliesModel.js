@@ -6,6 +6,11 @@ const repliesSchema = new mongoose.Schema({
         required : true,
         ref : 'threads'
     },
+    userId :{
+        type : mongoose.Schema.Types.ObjectId,
+        required : true,
+        ref : 'users'
+    },
     author :{
         type : String,
         required : true,

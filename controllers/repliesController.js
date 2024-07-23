@@ -41,8 +41,7 @@ const postReply = async (req, res) => {
         if(!threadId || !content){
             return res.status(400).json(createError('Thread ID and content are required'));
         }
-        const reply = new repliesModel({
-                                            threadId,
+        const reply = new repliesModel({    threadId,
                                             userId : id,
                                             author: username,
                                             content })
@@ -63,17 +62,20 @@ const deleteReply = async (req, res)  =>{
         const replyId = req.params.replyId;
         console.log(replyId)
         const reply = await repliesModel.findById(replyId);
-
+        console.log("deleting reply", replyId)
         if(!reply){
             return res.status(404).json(createError('Reply not found'));
         }
-        if(reply.userId !== id){
+        console.log(reply.userId.toString())
+        console.log(id)
+        
+        if(reply.userId.toString() !== id){
             return res.status(401).json(createError('Not unauthorized'))
         }
         await repliesModel.findByIdAndDelete(replyId);
         return res.status(200).json(createSuccess('Reply deleted'));
     }catch(error){
-        console.error('Error deleting reply:', error);
+        console.error('Error deleting reply:', error.message);
         return res.status(500).json(createError('Error deleting reply', error.message));
     }
 
