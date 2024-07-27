@@ -127,9 +127,9 @@ const deleteThread = async (req, res) => {
             return res.status(404).json(createError('Thread not found'));
         }
 
-        // if (thread?.userId?.toString() !== id) {
-        //     return res.status(403).json(createError('Unauthorized: You do not have permission to delete this thread'));
-        // }
+        if (thread?.userId.toString() !== id) {
+            return res.status(403).json(createError('Unauthorized: You do not have permission to delete this thread'));
+        }
 
         await threadsModel.findByIdAndDelete(threadId);
 

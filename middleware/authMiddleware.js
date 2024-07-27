@@ -22,7 +22,9 @@ const authMiddleware = (req, res, next) => {
             return next();
         }
 
+        console.log(req.headers)
         const token = req.headers['token'];
+        console.log(token)
         if (!token) {
             return res.status(401).json(createError('Authentication required. Token missing.'));
         }
