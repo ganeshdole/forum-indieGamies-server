@@ -65,6 +65,7 @@ const postNewThread = async (req, res) =>{
     try {
         const { title, description, categoryId} = req.body;
         const author = req.user.username;
+        const userId = req.user.id;
         if (!title || !description || !categoryId) {
             return res.status(400).json({ message: 'Title, content, and category are required' });
         }
@@ -73,6 +74,7 @@ const postNewThread = async (req, res) =>{
             title,
             description,
             category: categoryId,
+            userId,
             author,
             replies : 0,
             views : 0,
@@ -113,6 +115,33 @@ const updateThreadById = async (req, res) =>{
     }
 }
 
+
+const deleteThread = async (req, res) => {
+    try {
+        const { id } = req.user;
+        const { threadId } = req.params;
+
+        const thread = await threadsModel.findById(threadId);
+
+        if (!thread) {
+            return res.status(404).json(createError('Thread not found'));
+        }
+
+        // if (thread?.userId?.toString() !== id) {
+        //     return res.status(403).json(createError('Unauthorized: You do not have permission to delete this thread'));
+        // }
+
+        await threadsModel.findByIdAndDelete(threadId);
+
+
+        // await repliesModel.deleteMany({ threadId });
+
+        return res.status(200).json(createSuccess('Thread deleted successfully'));
+    } catch (error) {
+        console.error('Error deleting thread:', error);
+    }
+};
+
 module.exports = {
-    getLatestThread, getThreadsByCategory,getThreadById, postNewThread, updateThreadById
+    getLatestThread, getThreadsByCategory,getThreadById, postNewThread, updateThreadById, deleteThread
 }

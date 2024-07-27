@@ -60,15 +60,10 @@ const deleteReply = async (req, res)  =>{
     try{
         const {id } = req.user;
         const replyId = req.params.replyId;
-        console.log(replyId)
         const reply = await repliesModel.findById(replyId);
-        console.log("deleting reply", replyId)
         if(!reply){
             return res.status(404).json(createError('Reply not found'));
         }
-        console.log(reply.userId.toString())
-        console.log(id)
-        
         if(reply.userId.toString() !== id){
             return res.status(401).json(createError('Not unauthorized'))
         }

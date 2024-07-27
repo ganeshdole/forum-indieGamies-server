@@ -6,14 +6,20 @@ const threadsSchema = new mongoose.Schema({
         ref: 'categories',
         required: true
     },
+    
+    userId :{
+        type : mongoose.Schema.Types.ObjectId,
+        required : true,
+        ref : 'users'
+    },
+    author: {
+        type: String, 
+        required: true
+    },
     title: {
         type: String,
         required: true,
         trim: true
-    },
-    author: {
-        type: String, // temporarily using username, will switch to ObjectId and ref 'users'
-        required: true
     },
     replies: {
         type: Number,
@@ -25,7 +31,7 @@ const threadsSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        default: '' // default empty description
+        default: ''
     }
 },{
     timestamps: true 

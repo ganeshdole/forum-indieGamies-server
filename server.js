@@ -9,14 +9,10 @@ const morgan = require('morgan');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const connectDB = require("./db/db")
+const routes = require('./routes');
 
-const helloRouter = require("./routes/helloWorld")
-const authRouter = require("./routes/auth")
-const userRouter = require("./routes/user");
-const threadsRouter = require('./routes/threads');
-const categoriesRouter = require('./routes/categories');
-const repliesRouter = require('./routes/replies');
-const forgotPasswordRouter = require('./routes/forgotPassword');
+
+
 const authMiddleware = require('./middleware/authMiddleware');
 
 
@@ -48,21 +44,14 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use((req, res, next)=>{
-  console.log(req.url,"\n")
+  console.log(req.url,"\n *****************  ")
   next()
 })
 
 app.use(express.static('public'))
 
 app.use(authMiddleware)
-
-app.use("/",helloRouter);
-app.use('/auth', authRouter);
-app.use('/user', userRouter);
-app.use('/categories', categoriesRouter)
-app.use('/threads', threadsRouter);
-app.use('/replies', repliesRouter);
-app.use("/forgot-password", forgotPasswordRouter);
+app.use('/api', routes);
 
 connectDB()
   .then(()=>{

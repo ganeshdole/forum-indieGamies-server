@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
 const { createError } = require('../utils/utils'); 
 const protectedRoutes = [
-    { path: '/threads/thread/new', exact: true },
-    { path: '/replies/new', exact: true },
-    { path: '/user/update', exact: true },
-    { path: '/replies/delete', exact: false }  
+    { path: '/api/threads/thread/new', exact: true },
+    { path: '/api/replies/new', exact: true },
+    { path: '/api/user/update', exact: true },
+    { path: '/api/replies/delete', exact: false }  ,
+    { path: '/api/threads/delete', exact: false }  
   ];
 
 const authMiddleware = (req, res, next) => {
@@ -22,7 +23,6 @@ const authMiddleware = (req, res, next) => {
         }
 
         const token = req.headers['token'];
-        console.log(token)
         if (!token) {
             return res.status(401).json(createError('Authentication required. Token missing.'));
         }
