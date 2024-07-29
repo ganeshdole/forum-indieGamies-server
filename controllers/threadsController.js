@@ -4,9 +4,13 @@ const { createSuccess, createError } = require('../utils/utils')
 
 const getLatestThread = async (req, res) => {
     try {
+        const page = req.query.page;
+        const limit = req.query.limit;
+
         const threads = await threadsModel.find()
-            .sort({ createdAt: -1 }) 
-            .limit(10); 
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .skip((page -1 )* limit); 
 
         if (threads.length === 0) {
             return res.status(404).json(createError('No threads found'));
@@ -39,20 +43,14 @@ const getThreadById = async(req, res) =>{
 const getThreadsByCategory = async (req, res) => {
     try {
         const categoryId = req.params.categoryId;
-        
-
         if (!categoryId) {
             return res.status(400).json({ message: 'Category ID is required' });
         }
-
         const threads = await threadsModel.find({ category: categoryId });
         console.log(threads)
-
         if (!threads) {
             return res.status(404).json({ message: 'No threads found for this category' });
         }
-
-
         return res.status(200).json(threads);
     } catch (error) {
         console.error('Error getting threads:', error);
