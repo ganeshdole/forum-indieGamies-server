@@ -40,19 +40,19 @@ const getThreadsByCategory = async (req, res) => {
     try {
         const categoryId = req.params.categoryId;
         
-        // Validate categoryId
+
         if (!categoryId) {
             return res.status(400).json({ message: 'Category ID is required' });
         }
 
         const threads = await threadsModel.find({ category: categoryId });
         console.log(threads)
-        // Check if threads are found
+
         if (!threads) {
             return res.status(404).json({ message: 'No threads found for this category' });
         }
 
-        // Send the threads in the response
+
         return res.status(200).json(threads);
     } catch (error) {
         console.error('Error getting threads:', error);
