@@ -77,8 +77,13 @@ const verifyOtp = (req, res) => {
 const registerUser = async (req, res) => {
     try {
         const { username, email, password } = req.body;
-        let user = await userModel.findOne({ $or: [{ username }, { email }] });
-
+        
+        if (!username || !email || !password) {
+            return res.json(createError('All fields are required'));
+        }
+        let user = await userModel.findOne({ 
+            $or: [{ username: username.trim() }, { email: email.trim() }] 
+        });
         if (user) {
             return res.json(createError(user.username === username ? 'Username already exists' : 'Email already exists'));
         }
