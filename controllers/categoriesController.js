@@ -1,10 +1,8 @@
 const categoriesModel = require('../db/models/categoriesModel');
 const { createSuccess, createError } = require('../utils/utils');
-const redisClient = require("../config/redis")
 
 const getCategorie = async (req, res) => {
     try {
-       
         const categorieId = req.params.id;
         const categorie = await categoriesModel.findById(categorieId);
         
@@ -21,19 +19,12 @@ const getCategorie = async (req, res) => {
 
 const getCategories = async (req, res) => {
     try {
-        let categories = await redisClient.call('JSON.GET', 'categories');
-        if (categories) {
-            categories = JSON.parse(categories);
-            return res.status(200).json(createSuccess(categories));
-        }
-        
-        categories = await categoriesModel.find();
-       
+        const categories = await categoriesModel.find();
         
         if (categories.length === 0) {
             return res.status(404).json(createError('No categories found'));
         }
-        await redisClient.call('JSON.SET', 'categories', '.', JSON.stringify(categories));
+
         res.status(200).json(createSuccess(categories));
     } catch (error) {
         console.error('Error getting categories:', error.message);
