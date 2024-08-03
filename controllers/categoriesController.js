@@ -1,5 +1,6 @@
 const categoriesModel = require('../db/models/categoriesModel');
 const { createSuccess, createError } = require('../utils/utils');
+const redisClient = require("../config/redis");
 
 const getCategorie = async (req, res) => {
     try {
@@ -19,11 +20,25 @@ const getCategorie = async (req, res) => {
 
 const getCategories = async (req, res) => {
     try {
-        const categories = await categoriesModel.find();
+        // Try to get categories from Redis
+        let categoriesJson = await redisClient.get('categories');
+        let categories;
+
+        if (categoriesJson) {
+            // If found in Redis, parse and return
+            categories = JSON.parse(categoriesJson);
+            return res.status(200).json(createSuccess(categories));
+        }
+        
+        // If not in Redis, fetch from database
+        categories = await categoriesModel.find();
         
         if (categories.length === 0) {
             return res.status(404).json(createError('No categories found'));
         }
+
+        // Store in Redis for future requests
+        await redisClient.set('categories', JSON.stringify(categories), 'EX', 3600); // Cache for 1 hour
 
         res.status(200).json(createSuccess(categories));
     } catch (error) {
